@@ -12,7 +12,7 @@ if (!css.includes('aspect-ratio: 720 / 920')) throw new Error('Board canvas must
 if (!css.includes('max-width: 720px')) throw new Error('Board canvas must be capped so it does not over-stretch on wide screens.');
 if (css.includes('object-fit: contain')) throw new Error('Canvas must not use object-fit: contain because it letterboxes the visual bitmap inside a larger click box.');
 if (/#board\s*\{[^}]*max-height:/s.test(css)) throw new Error('Canvas itself must not be max-height constrained; constrain the board-stage width instead so hit testing and pixels share one box.');
-if (!css.includes('--board-fit-width: min(100%, 720px, calc((100dvh - 255px) * 720 / 920))')) {
+if (!css.includes('--board-fit-width: min(100%, 720px, calc((100dvh - 315px) * 720 / 920))')) {
   throw new Error('Mobile/tablet board-stage must shrink by available height while preserving the 720/920 clickable box.');
 }
 if (!css.includes('@media (max-width: 640px)')) throw new Error('Mobile layout breakpoint is required.');
@@ -150,8 +150,11 @@ if (!app.includes('function drawMoveClock') || !app.includes('function drawSeven
 if (!app.includes('selectedMoveTimerSeconds') || !app.includes('moveTimeLimitSeconds') || !app.includes('expireLocalTurnIfNeeded')) {
   throw new Error('Client must create rooms/local games with configurable move timers and enforce local timeouts.');
 }
-if (!html.includes('id="pauseOverlay"') || !html.includes('id="playPauseGame"') || !css.includes('.board-stage.paused #board') || !css.includes('.play-pause-button {')) {
-  throw new Error('Pause UI must include a visible Play-page pause control and a blurred board overlay.');
+if (!html.includes('id="pauseOverlay"') || !html.includes('id="playPauseGame"') || !html.includes('⏸') || !css.includes('.board-stage.paused #board') || !css.includes('.play-pause-button.ghost {') || !css.includes('width: fit-content;')) {
+  throw new Error('Pause UI must include a compact visible Play-page pause control and a blurred board overlay.');
+}
+if (!html.includes('id="appMenuButton"') || !html.includes('id="appMenuDropdown"') || !html.includes('id="appContentOverlay"') || !html.includes('data-menu-view="history"') || !html.includes('data-menu-view="rules"') || !html.includes('id="appMenuHistory"') || !html.includes('id="appMenuRules"') || html.includes('id="historyList"') || css.includes('.play-pause-button { display: block;') || !app.includes('openAppContent')) {
+  throw new Error('Mobile app menu must be a dropdown first, then open separate History/Rules content windows outside the Match tab.');
 }
 if (!app.includes('scheduleLocalTurnTimeout') || !app.includes('localTimeoutTimer') || !app.includes('Both players timed out. Game paused.')) {
   throw new Error('Local mode must schedule idle timeout auto-pause without waiting for a board click.');
@@ -228,7 +231,7 @@ const icon = readFileSync('public/icon.svg', 'utf8');
 if (!icon.includes('<svg') || !icon.includes('Traceball Arena icon')) throw new Error('Traceball SVG icon is required.');
 const sw = readFileSync('public/sw.js', 'utf8');
 if (!sw.includes('self.addEventListener') || !sw.includes('CACHE_NAME')) throw new Error('PWA service worker shell cache is required.');
-if (!sw.includes('traceball-arena-v25') || !sw.includes('SKIP_WAITING') || !sw.includes('/history.js')) throw new Error('PWA service worker must force an app-shell refresh for installed apps and cache the history module.');
+if (!sw.includes('traceball-arena-v28') || !sw.includes('SKIP_WAITING') || !sw.includes('/history.js')) throw new Error('PWA service worker must force an app-shell refresh for installed apps and cache the history module.');
 
 for (const marker of ['.online-form-stack', 'padding: 18px', '.invite {', 'padding: 16px', '.online-action-toggle {', 'margin-top: 2px']) {
   if (!css.includes(marker)) throw new Error(`Home form spacing must let name/action/invite sections breathe: missing ${marker}`);

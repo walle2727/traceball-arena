@@ -61,7 +61,16 @@ const els = {
   replayRange: document.querySelector('#replayRange'),
   replayText: document.querySelector('#replayText'),
   historyList: document.querySelector('#historyList'),
+  menuHistoryList: document.querySelector('#menuHistoryList'),
   clearHistory: document.querySelector('#clearHistory'),
+  clearMenuHistory: document.querySelector('#clearMenuHistory'),
+  appMenuButton: document.querySelector('#appMenuButton'),
+  appMenuDropdown: document.querySelector('#appMenuDropdown'),
+  appContentOverlay: document.querySelector('#appContentOverlay'),
+  appContentClose: document.querySelector('#appContentClose'),
+  appContentTitle: document.querySelector('#appContentTitle'),
+  appMenuHistory: document.querySelector('#appMenuHistory'),
+  appMenuRules: document.querySelector('#appMenuRules'),
   turnIndicator: document.querySelector('#turnIndicator'),
   toast: document.querySelector('#toast'),
 };
@@ -149,8 +158,27 @@ function init() {
   els.replayNext.addEventListener('click', () => setReplay(Math.min((game?.moves?.length || 0), currentReplay() + 1)));
   els.replayEnd.addEventListener('click', () => setReplay(game?.moves?.length || 0));
   els.replayRange.addEventListener('input', () => setReplay(Number(els.replayRange.value)));
-  els.historyList.addEventListener('click', historyListClick);
-  els.clearHistory.addEventListener('click', clearGameHistory);
+  if (els.historyList) els.historyList.addEventListener('click', historyListClick);
+  els.menuHistoryList.addEventListener('click', historyListClick);
+  if (els.clearHistory) els.clearHistory.addEventListener('click', clearGameHistory);
+  els.clearMenuHistory.addEventListener('click', clearGameHistory);
+  els.appMenuButton.addEventListener('click', toggleAppMenu);
+  els.appMenuDropdown.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-menu-view]');
+    if (button) openAppContent(button.dataset.menuView);
+  });
+  els.appContentClose.addEventListener('click', closeAppContent);
+  els.appContentOverlay.addEventListener('click', (event) => {
+    if (event.target === els.appContentOverlay) closeAppContent();
+  });
+  document.addEventListener('click', (event) => {
+    if (!els.appMenuDropdown.classList.contains('hidden') && !event.target.closest('#appMenuDropdown') && !event.target.closest('#appMenuButton')) closeAppMenu();
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape') return;
+    if (!els.appContentOverlay.classList.contains('hidden')) closeAppContent();
+    else if (!els.appMenuDropdown.classList.contains('hidden')) closeAppMenu();
+  });
   mobileTabs.forEach((tab) => tab.addEventListener('click', () => setMobilePage(tab.dataset.pageTarget)));
   window.addEventListener('online', wakeConnection);
   window.addEventListener('focus', wakeConnection);
@@ -523,12 +551,12 @@ function saveFinishedGameIfNeeded() {
 
 function renderHistoryPanel() {
   const history = localStorageJsonGet(HISTORY_STORAGE_KEY, []);
-  els.clearHistory.disabled = history.length === 0;
-  if (!history.length) {
-    els.historyList.innerHTML = '<p class="history-empty">Finished games will appear here. Online games are saved on every device that sees the result.</p>';
-    return;
-  }
-  els.historyList.innerHTML = history.slice(0, 8).map((entry, index) => historyItemHtml(entry, index)).join('');
+  if (els.clearHistory) els.clearHistory.disabled = history.length === 0;
+  els.clearMenuHistory.disabled = history.length === 0;
+  const emptyHtml = '<p class="history-empty">Finished games will appear here. Online games are saved on every device that sees the result.</p>';
+  const listHtml = history.length ? history.slice(0, 8).map((entry, index) => historyItemHtml(entry, index)).join('') : emptyHtml;
+  if (els.historyList) els.historyList.innerHTML = listHtml;
+  els.menuHistoryList.innerHTML = listHtml;
 }
 
 function historyItemHtml(entry, index) {
@@ -573,6 +601,7 @@ function loadHistoryReplay(entry) {
   updateUi();
   draw();
   setMobilePage('play');
+  closeAppContent();
   toast('Loaded saved replay.');
 }
 
@@ -580,6 +609,39 @@ function clearGameHistory() {
   localStorageSafeRemove(HISTORY_STORAGE_KEY);
   renderHistoryPanel();
   toast('Game history cleared on this device.');
+}
+
+function toggleAppMenu() {
+  if (els.appMenuDropdown.classList.contains('hidden')) openAppMenu();
+  else closeAppMenu();
+}
+
+function openAppMenu() {
+  els.appMenuDropdown.classList.remove('hidden');
+  els.appMenuButton.setAttribute('aria-expanded', 'true');
+}
+
+function closeAppMenu() {
+  els.appMenuDropdown.classList.add('hidden');
+  els.appMenuButton.setAttribute('aria-expanded', 'false');
+}
+
+function openAppContent(view) {
+  const selected = view === 'rules' ? 'rules' : 'history';
+  closeAppMenu();
+  els.appMenuHistory.classList.toggle('hidden', selected !== 'history');
+  els.appMenuRules.classList.toggle('hidden', selected !== 'rules');
+  els.appContentTitle.textContent = selected === 'history' ? 'Play History' : 'Rules';
+  if (selected === 'history') renderHistoryPanel();
+  els.appContentOverlay.classList.remove('hidden');
+  document.body.classList.add('menu-open');
+  requestAnimationFrame(() => els.appContentClose.focus());
+}
+
+function closeAppContent() {
+  els.appContentOverlay.classList.add('hidden');
+  document.body.classList.remove('menu-open');
+  els.appMenuButton.focus();
 }
 
 function makeLocalMove(to) {

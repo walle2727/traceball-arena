@@ -13,11 +13,14 @@
   <body>
     <main class="shell">
       <section class="hero">
-        <div>
+        <div class="hero-copy">
           <p class="eyebrow">Realtime paper-soccer</p>
           <h1>Traceball Arena</h1>
           <p class="lede">Draw one line per move, bounce from old points and walls, and sneak the ball into the other gate.</p>
         </div>
+        <button id="appMenuButton" class="app-menu-button" type="button" aria-label="Open app menu" aria-expanded="false" aria-controls="appMenuOverlay">
+          <span aria-hidden="true">☰</span>
+        </button>
       </section>
 
       <nav class="mobile-nav" aria-label="Mobile game pages">
@@ -118,7 +121,7 @@
         <div class="board-card mobile-page" data-mobile-page="play">
           <div id="playStatus" class="play-status">Create or join a room to start.</div>
           <div id="turnIndicator" class="turn-indicator" aria-live="polite">Waiting for players</div>
-          <button id="playPauseGame" class="play-pause-button ghost" type="button">Pause game</button>
+          <button id="playPauseGame" class="play-pause-button ghost" type="button"><span aria-hidden="true">⏸</span> Pause</button>
           <div class="board-stage">
             <canvas id="board" width="720" height="920" aria-label="Traceball board"></canvas>
             <div id="pauseOverlay" class="pause-overlay hidden" aria-live="polite" role="dialog" aria-modal="true" aria-labelledby="pauseTitle">
@@ -169,35 +172,52 @@
             <button id="pauseGame" class="ghost">Pause game</button>
             <button id="reset" class="ghost">New round</button>
           </div>
-          <div class="card rules">
-            <h2>Rules</h2>
-            <ul>
-              <li>Move one point in any of 8 directions.</li>
-              <li>No line segment can be reused.</li>
-              <li>Margin lines are already traced; only margin points may be used.</li>
-              <li>Landing on a visited point, wall, or black gate-mouth dot gives another move.</li>
-              <li>The black dot in the middle of each gate line is already a bounce point, even before anyone visits it.</li>
-              <li>Score in the opponent gate. Own gate = own goal.</li>
-              <li>If a move timer is enabled, each move or bounce gets a fresh clock.</li>
-              <li>If time expires, no line is drawn; the ball stays put and the turn passes.</li>
-              <li>Two timeouts in a row pause the game; the board is hidden until play resumes.</li>
-              <li>Either joined player can pause or resume during a round.</li>
-              <li>If you are stuck, you lose.</li>
-            </ul>
-          </div>
-          <div class="card history-card">
-            <div class="history-header">
-              <div>
-                <h2>History</h2>
-                <p>Saved on this device for local and online games.</p>
-              </div>
-              <button id="clearHistory" class="ghost" type="button">Clear</button>
-            </div>
-            <div id="historyList" class="history-list">Finished games will appear here.</div>
-          </div>
+
         </aside>
       </section>
     </main>
+    <div id="appMenuDropdown" class="app-menu-dropdown hidden" role="menu" aria-label="App menu">
+      <button class="app-menu-choice" type="button" role="menuitem" data-menu-view="history">Play History</button>
+      <button class="app-menu-choice" type="button" role="menuitem" data-menu-view="rules">Rules</button>
+      <p class="app-menu-note">More settings later.</p>
+    </div>
+    <div id="appContentOverlay" class="app-content-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="appContentTitle">
+      <div class="app-content-panel">
+        <div class="app-content-header">
+          <div>
+            <p class="app-menu-kicker">Traceball Arena</p>
+            <h2 id="appContentTitle">Menu</h2>
+          </div>
+          <button id="appContentClose" class="app-menu-close" type="button" aria-label="Close window">×</button>
+        </div>
+        <section id="appMenuHistory" class="app-menu-section app-menu-history hidden">
+          <div class="history-header">
+            <div>
+              <h3>Play History</h3>
+              <p>Saved on this device for local and online games.</p>
+            </div>
+            <button id="clearMenuHistory" class="ghost" type="button">Clear</button>
+          </div>
+          <div id="menuHistoryList" class="history-list">Finished games will appear here.</div>
+        </section>
+        <section id="appMenuRules" class="app-menu-section app-menu-rules hidden">
+          <h3>Rules</h3>
+          <ul>
+            <li>Move one point in any of 8 directions.</li>
+            <li>No line segment can be reused.</li>
+            <li>Margin lines are already traced; only margin points may be used.</li>
+            <li>Landing on a visited point, wall, or black gate-mouth dot gives another move.</li>
+            <li>The black dot in the middle of each gate line is already a bounce point, even before anyone visits it.</li>
+            <li>Score in the opponent gate. Own gate = own goal.</li>
+            <li>If a move timer is enabled, each move or bounce gets a fresh clock.</li>
+            <li>If time expires, no line is drawn; the ball stays put and the turn passes.</li>
+            <li>Two timeouts in a row pause the game; the board is hidden until play resumes.</li>
+            <li>Either joined player can pause or resume during a round.</li>
+            <li>If you are stuck, you lose.</li>
+          </ul>
+        </section>
+      </div>
+    </div>
     <div id="toast" role="status"></div>
     <script type="module" src="/app.js"></script>
   </body>
